@@ -43,6 +43,17 @@ Image: boot/bootsect boot/setup tools/system tools/build
 	strip system.tmp
 	objcopy -O binary -R .note -R .comment system.tmp tools/kernel
 	tools/build boot/bootsect boot/setup tools/kernel $(ROOT_DEV)  > Image
+	find -name *.o | xargs rm
+	rm kernel/blk_drv/blk_drv.a
+	rm kernel/chr_drv/chr_drv.a
+	rm kernel/chr_drv/keyboard.s
+	rm kernel/math/math.a
+	rm lib/lib.a
+	rm tools/build
+	rm tools/system
+	rm boot/bootsect
+	rm tools/kernel
+	sync
 	cp Image /media/psf/Home/study/os/
 	cp tools/system tools/build /media/psf/Home/study/os/
 	#rm system.tmp
@@ -99,14 +110,14 @@ boot/setup: boot/setup.s
 	$(AS86) -o boot/setup.o boot/setup.s
 	$(LD86) -s -o boot/setup boot/setup.o
 
-boot/bootsect:	boot/jboot_sect.s
-	$(AS86) -o boot/bootsect.o boot/jboot_sect.s
+boot/bootsect:	boot/bootsect.s
+	$(AS86) -o boot/bootsect.o boot/bootsect.s
 	$(LD86) -s -o boot/bootsect boot/bootsect.o
 
-tmp.s:	boot/jboot_sect.s tools/system
+tmp.s:	boot/bootsect.s tools/system
 	(echo -n "SYSSIZE = (";ls -l tools/system | grep system \
 		| cut -c25-31 | tr '\012' ' '; echo "+ 15 ) / 16") > tmp.s
-	cat boot/jboot_sect.s >> tmp.s
+	cat boot/bootsect.s >> tmp.s
 
 clean:
 	rm -f Image System.map tmp_make core boot/bootsect boot/setup

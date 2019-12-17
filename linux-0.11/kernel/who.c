@@ -1,5 +1,6 @@
 #include <asm/segment.h>
 #include <errno.h>
+#include <string.h>
 
 char g_name[24];
 
@@ -34,5 +35,5 @@ int whoami(char* name, unsigned int size)
 		put_fs_byte(g_name[result], name[result]);
 	}
 
-	return result
+	return result;
 }
