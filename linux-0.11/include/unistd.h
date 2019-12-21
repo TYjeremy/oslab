@@ -130,6 +130,10 @@
 #define __NR_setreuid	70
 #define __NR_setregid	71
 
+//add by fanxzh for user
+#define __NR_iam	72
+#define __NR_whoami	73
+
 #define _syscall0(type,name) \
 type name(void) \
 { \

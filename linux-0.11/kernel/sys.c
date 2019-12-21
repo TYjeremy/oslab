@@ -227,6 +227,15 @@ int sys_uname(struct utsname * name)
 	return 0;
 }
 
+int sys_iam(const char * name)
+{
+	return iam(name);
+}
+int sys_whoami(char* name, unsigned int size)
+{
+	return whoami(name, size);
+}
+
 int sys_umask(int mask)
 {
 	int old = current->umask;

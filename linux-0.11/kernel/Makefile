@@ -49,7 +49,6 @@ dep:
 
 ### Dependencies:
 who.s who.o: who.c
-
 exit.s exit.o: exit.c ../include/errno.h ../include/signal.h \
   ../include/sys/types.h ../include/sys/wait.h ../include/linux/sched.h \
   ../include/linux/head.h ../include/linux/fs.h ../include/linux/mm.h \

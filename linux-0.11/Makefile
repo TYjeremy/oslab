@@ -43,17 +43,6 @@ Image: boot/bootsect boot/setup tools/system tools/build
 	strip system.tmp
 	objcopy -O binary -R .note -R .comment system.tmp tools/kernel
 	tools/build boot/bootsect boot/setup tools/kernel $(ROOT_DEV)  > Image
-	find -name *.o | xargs rm
-	rm kernel/blk_drv/blk_drv.a
-	rm kernel/chr_drv/chr_drv.a
-	rm kernel/chr_drv/keyboard.s
-	rm kernel/math/math.a
-	rm lib/lib.a
-	rm tools/build
-	rm tools/system
-	rm boot/bootsect
-	rm tools/kernel
-	sync
 	cp Image /media/psf/Home/study/os/
 	cp tools/system tools/build /media/psf/Home/study/os/
 	#rm system.tmp
