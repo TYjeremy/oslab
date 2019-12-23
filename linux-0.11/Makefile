@@ -43,10 +43,10 @@ Image: boot/bootsect boot/setup tools/system tools/build
 	strip system.tmp
 	objcopy -O binary -R .note -R .comment system.tmp tools/kernel
 	tools/build boot/bootsect boot/setup tools/kernel $(ROOT_DEV)  > Image
-	cp Image /media/psf/Home/study/os/
-	cp tools/system tools/build /media/psf/Home/study/os/
-	#rm system.tmp
-	#rm tools/kernel -f
+#	cp Image /media/psf/Home/study/os/
+#	cp tools/system tools/build /media/psf/Home/study/os/
+	rm system.tmp
+	rm tools/kernel -f
 	sync
 
 disk: Image
