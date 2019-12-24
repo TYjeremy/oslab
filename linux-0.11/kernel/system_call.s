@@ -45,6 +45,9 @@ EFLAGS		= 0x24
 OLDESP		= 0x28
 OLDSS		= 0x2C
 
+ESP0 = 4
+KERSTACK = 12
+
 state	= 0		# these are offsets into the task-struct.
 counter	= 4
 priority = 8
@@ -67,6 +70,64 @@ nr_system_calls = 74
 .globl system_call,sys_fork,timer_interrupt,sys_execve
 .globl hd_interrupt,floppy_interrupt,parallel_interrupt
 .globl device_not_available, coprocessor_error
+.global switch_to, first_return_from_kernel
+
+.align 2
+switch_to:
+//user ebp -> esp
+	pushl %ebp
+	movl %esp, %ebp
+	pushl %ecx
+	pushl %ebx
+	pushl %eax
+
+//exchage task   ebx->new tsk
+	movl 8(%ebp), %ebx
+	cmpl %ebx, current
+	je 1f
+
+//exange pcb eax -> old tsk
+	movl %ebx, %eax
+	xchgl %eax, current
+	
+//set tss esp0
+	movl current_tss, %ecx
+	addl $4096, %ebx
+	movl %ebx, ESP0(%ecx)
+
+//exchange kernel esp 1. save old tsk esp
+	movl %esp, KERSTACK(%eax)
+	movl 8(%ebp), %ebx
+	movl KERSTACK(%ebx), %esp
+
+//set ldt & load fs
+	movl 12(%ebp), %ecx
+	lldt %cx
+
+	movl $0x17, %ecx
+	mov %cx, %fs
+
+    cmpl %eax,last_task_used_math
+    jne 1f
+    clts
+
+1:
+	popl %eax
+	popl %ebx
+	popl %ecx
+	popl %ebp
+	ret
+
+.align 2
+first_return_from_kernel:
+	popl %edx
+	pop %ds
+	pop %es
+	pop %fs
+	pop %gs
+	popl %esi
+	popl %edi
+	iret
 
 .align 2
 bad_sys_call:

@@ -66,6 +66,7 @@ int copy_mem(int nr,struct task_struct * p)
  * information (task[nr]) and sets up the necessary registers. It
  * also copies the data segment in it's entirety.
  */
+extern long first_return_from_kernel();
 int copy_process(int nr,long ebp,long edi,long esi,long gs,long none,
 		long ebx,long ecx,long edx,
 		long fs,long es,long ds,
@@ -74,6 +75,7 @@ int copy_process(int nr,long ebp,long edi,long esi,long gs,long none,
 	struct task_struct *p;
 	int i;
 	struct file *f;
+	long* krstack = 0;
 
 	p = (struct task_struct *) get_free_page();
 	if (!p)
@@ -90,27 +92,55 @@ int copy_process(int nr,long ebp,long edi,long esi,long gs,long none,
 	p->utime = p->stime = 0;
 	p->cutime = p->cstime = 0;
 	p->start_time = jiffies;
-	p->tss.back_link = 0;
-	p->tss.esp0 = PAGE_SIZE + (long) p;
-	p->tss.ss0 = 0x10;
-	p->tss.eip = eip;
-	p->tss.eflags = eflags;
-	p->tss.eax = 0;
-	p->tss.ecx = ecx;
-	p->tss.edx = edx;
-	p->tss.ebx = ebx;
-	p->tss.esp = esp;
-	p->tss.ebp = ebp;
-	p->tss.esi = esi;
-	p->tss.edi = edi;
-	p->tss.es = es & 0xffff;
-	p->tss.cs = cs & 0xffff;
-	p->tss.ss = ss & 0xffff;
-	p->tss.ds = ds & 0xffff;
-	p->tss.fs = fs & 0xffff;
-	p->tss.gs = gs & 0xffff;
-	p->tss.ldt = _LDT(nr);
-	p->tss.trace_bitmap = 0x80000000;
+
+
+//int copy_process(int nr,long ebp,long edi,long esi,long gs,long none,
+//		long ebx,long ecx,long edx,
+//		long fs,long es,long ds,
+//		long eip,long cs,long eflags,long esp,long ss)
+	krstack = (long)(PAGE_SIZE + (long) p);
+	*(--krstack) = ss & 0xffff;
+	*(--krstack) = esp;
+	*(--krstack) = eflags;
+	*(--krstack) = cs & 0xffff;
+	*(--krstack) = eip;
+//iret
+	*(--krstack) = edi;
+	*(--krstack) = esi;
+	*(--krstack) = gs & 0xffff;
+	*(--krstack) = fs & 0xffff;
+	*(--krstack) = es & 0xffff;
+	*(--krstack) = ds & 0xffff;
+	*(--krstack) = edx;
+//first return
+	*(--krstack) = first_return_from_kernel;
+	*(--krstack) = ebp;
+	*(--krstack) = ecx;
+	*(--krstack) = ebx;
+	*(--krstack) = 0;
+	p->krstack = krstack;
+
+	//p->tss.back_link = 0;
+	//p->tss.esp0 = PAGE_SIZE + (long) p;
+	//p->tss.ss0 = 0x10;
+	//p->tss.eip = eip;
+	//p->tss.eflags = eflags;
+	//p->tss.eax = 0;
+	//p->tss.ecx = ecx;
+	//p->tss.edx = edx;
+	//p->tss.ebx = ebx;
+	//p->tss.esp = esp;
+	//p->tss.ebp = ebp;
+	//p->tss.esi = esi;
+	//p->tss.edi = edi;
+	//p->tss.es = es & 0xffff;
+	//p->tss.cs = cs & 0xffff;
+	//p->tss.ss = ss & 0xffff;
+	//p->tss.ds = ds & 0xffff;
+	//p->tss.fs = fs & 0xffff;
+	//p->tss.gs = gs & 0xffff;
+	//p->tss.ldt = _LDT(nr);
+	//p->tss.trace_bitmap = 0x80000000;
 	if (last_task_used_math == current)
 		__asm__("clts ; fnsave %0"::"m" (p->tss.i387));
 	if (copy_mem(nr,p)) {

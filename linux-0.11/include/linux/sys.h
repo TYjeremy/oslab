@@ -70,6 +70,8 @@ extern int sys_sgetmask();
 extern int sys_ssetmask();
 extern int sys_setreuid();
 extern int sys_setregid();
+extern long switch_to();
+extern long first_return_from_kernel();
 
 //add by fanxzh for sys interface
 extern int sys_iam();
