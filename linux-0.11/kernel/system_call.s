@@ -46,14 +46,14 @@ OLDESP		= 0x28
 OLDSS		= 0x2C
 
 ESP0 = 4
-KERSTACK = 12
 
 state	= 0		# these are offsets into the task-struct.
 counter	= 4
 priority = 8
-signal	= 12
-sigaction = 16		# MUST be 16 (=len of sigaction)
-blocked = (33*16)
+KERSTACK = 12
+signal	= 16
+sigaction = 20		# MUST be 16 (=len of sigaction)
+blocked = (33*16) + 4
 
 # offsets within sigaction
 sa_handler = 0
